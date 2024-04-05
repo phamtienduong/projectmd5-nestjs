@@ -18,9 +18,35 @@ export class ProductsService {
     return await this.productRespository.save(newProduct);
   }
 
-  async findAll() {
-    const products = await this.productRespository.createQueryBuilder('products').orderBy("products.discount", "ASC").getMany();
+  async findAll(query: any) {
+    console.log('query3333', query.min, query.max);
+    if (query.orderBy == 'ASC') {
+      const products = await this.productRespository
+        .createQueryBuilder('products')
+        .where('products.price between :min and :max', { min: query.min, max: query.max })
+        .orderBy('products.price', 'ASC')
+        .getMany();
+      return products;
+    }
+    if (query.orderBy == 'DESC') {
+      const products = await this.productRespository
+        .createQueryBuilder('products')
+        .where('products.price between :min and :max', { min: query.min, max: query.max })
+        .orderBy('products.price', 'DESC')
+        .getMany();
+      return products;
+    }
+    
+    const products = await this.productRespository
+      .createQueryBuilder('products')
+      .where('products.price between :min and :max', { min: query.min, max: query.max })
+      .orderBy('products.discount', 'ASC')
+      .getMany();
+    console.log("productss",products);
+    
     return products;
+    
+    
   }
 
   async findOne(id: number) {
@@ -55,13 +81,14 @@ export class ProductsService {
     return products;
   }
   async searchProductsByName(name: string): Promise<ProductEntity[]> {
-
-    return this.productRespository
-      .createQueryBuilder('products')
-      // .innerJoinAndSelect('products.category', 'category')
-      .where('products.product_name LIKE :name', { name: `%${name}%` })
-      .getMany();
-    }
+    return (
+      this.productRespository
+        .createQueryBuilder('products')
+        // .innerJoinAndSelect('products.category', 'category')
+        .where('products.product_name LIKE :name', { name: `%${name}%` })
+        .getMany()
+    );
+  }
   async updateStock(id: number, updateProductDto: UpdateProductDto) {
     const updateStock = await this.productRespository
       .createQueryBuilder()

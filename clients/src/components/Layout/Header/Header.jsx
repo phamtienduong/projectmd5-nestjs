@@ -24,6 +24,8 @@ import {
 } from "@headlessui/react";
 import publicAxios from "../../../config/publicAxios";
 import { useDispatch, useSelector } from "react-redux";
+import { Space } from "antd";
+import Search from "antd/es/input/Search";
 
 
 
@@ -70,24 +72,42 @@ function classNames(...classes) {
 }
 
 export default function Header({ isLogin, setIsLogin, setIsLoad },) {
- 
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userLogin,setUserLogin]=useState(
+  const [userLogin, setUserLogin] = useState(
     JSON.parse(localStorage.getItem("user_login")) || {}
   )
-  const [category,setCategory]=useState([])
+  const [category, setCategory] = useState([])
+  const [searchValue, setSearchValue] = useState("");
+  const [dataSearch,setDataSearch] = useState([])
   const navigate = useNavigate();
-  const cart = useSelector((state)=>{
+  const cart = useSelector((state) => {
     // console.log("sate",state)
     return state.cartSlices.cart
   })
   // console.log('Cart : ',cart)
   const dispatch = useDispatch();
-   const handleClickCategory = (id) => {
-   localStorage.setItem("categoryId", JSON.stringify(id));
+  const handleClickCategory = (id) => {
+    localStorage.setItem("categoryId", JSON.stringify(id));
     setIsLoad((prev) => !prev);
     navigate("category");
   };
+  const handleSearch = async () => {
+    if (searchValue == "") {
+      try {
+        const res = await publicAxios.get(`/api/v1/products/search?key=${searchValue}`)
+        console.log(res.data)
+        const result = res.data
+        if (result.length>0) {
+          setDataSearch(result)
+          setSearchValue(result[0].product_name)
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+  }
 
   const handleLogout = () => {
     localStorage.clear();
@@ -106,7 +126,16 @@ export default function Header({ isLogin, setIsLogin, setIsLoad },) {
     // dispatch(action("setUserLogin"));
     setUserLogin(JSON.parse(localStorage.getItem("user_login")));
     getCategory();
+    handleSearch()
   }, [isLogin]);
+  const theLastName = (name) => {
+    var arr = name.split("");
+    if (arr.includes(" ")) {
+      arr = name.split(" ");
+      return arr[arr.length - 1];
+    } 
+    return name;
+  }
   return (
     <header className="bg-white">
       <nav
@@ -122,7 +151,7 @@ export default function Header({ isLogin, setIsLogin, setIsLoad },) {
                 className="h-8 w-auto"
                 src="https://theme.hstatic.net/200000549029/1000902525/14/logo.png?v=3044"
                 alt=""
-                style={{ width: 70, height:50 }}
+                style={{ width: 70, height: 50 }}
               />
             </Link>
           </Link>
@@ -231,15 +260,16 @@ export default function Header({ isLogin, setIsLogin, setIsLoad },) {
             to="#"
             className="text-lg font-semibold leading-6 text-gray-900"
           >
-            <div className="InputContainer">
-              <input
-                placeholder="Search.."
-                id="input"
-                className="input"
-                name="text"
-                type="text"
-              />
-            </div>
+              <Space direction="vertical">
+                <Search
+                  placeholder="input search text"
+                  allowClear
+                  // enterButton="search"
+                  // value={search}
+                  size="large"
+                  onSearch={handleSearch}
+                />
+              </Space>
           </Link>
           <Link
             href="#"
@@ -247,12 +277,12 @@ export default function Header({ isLogin, setIsLogin, setIsLoad },) {
           >
             <Menu as="div" className="relative ml-3">
               <div>
-                {userLogin && userLogin.user_id? (
-                  <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                {userLogin && userLogin.user_id ? (
+                  <Menu.Button className="w-max relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                     <span className="absolute -inset-1.5" />
                     <span className="sr-only">Open user menu</span>
                     <span style={{ backgroundColor: "white" }}>
-                      {userLogin.user_name}
+                      Chào, {theLastName(userLogin.user_name)}
                     </span>
                   </Menu.Button>
                 ) : (

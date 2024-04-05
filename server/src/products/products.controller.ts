@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
+import { query } from 'express';
 
 @Controller('api/v1/products')
 export class ProductsController {
@@ -27,9 +28,10 @@ export class ProductsController {
     }
   }
   @Get("list")
-  async findAll() {
+  async findAll(@Query()query) {
+    console.log("query1",query);
     try {
-      const result = await this.productsService.findAll();
+      const result = await this.productsService.findAll(query);
       return {
         statusCode: HttpStatus.OK,
         message: 'Lấy danh sách sản phẩm thành công',
@@ -109,6 +111,8 @@ export class ProductsController {
       console.log(error);
     }
   }
+
+  
 
  
 }

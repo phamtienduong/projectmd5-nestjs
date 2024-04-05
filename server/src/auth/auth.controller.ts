@@ -17,6 +17,28 @@ export class AuthController {
     }
     
   }
+  @Post("/sign-google")
+  @HttpCode(201)
+  async loginByGoogle(@Body() body: any) {
+    const user = await this.authService.loginByGoogle(body);
+    console.log(user);
+        return{
+      message: 'Đăng nhập thành công',
+      data: user
+    }
+    
+  }
+  @Post("/sign-facebook")
+  @HttpCode(201)
+  async loginByFaceBook(@Body() body: any) {
+    const user = await this.authService.loginByFaceBook(body);
+    console.log(user);
+        return{
+      message: 'Đăng nhập thành công',
+      data: user
+    }
+    
+  }
   @Post('/sign-in')
   @HttpCode(200)
   async signIn( @Body() user:{email:string,password:string}) {
